@@ -61,11 +61,6 @@ function setup() {
 
 }
 
-
-
-
-
-
 function draw() {
   clear();
   if(mode==0){
@@ -75,11 +70,11 @@ function draw() {
     text('[여기에 제목을 입력]',0,-80);
     textSize(48);
     text('Press Enter to start',0,120);
-      
+
   }
   if (mode==1){
-    
-    
+
+
   framePreset = frameCount / FRAME_RATE;
   moonlight = framePreset / 3;
   if (sin(framePreset) > 0) {
