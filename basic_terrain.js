@@ -21,19 +21,21 @@ let flightShootDelay = 0;
 let flightLife = 1;
 var mode;
 let font;
+var score=0;
 
 
-function preload(){
+function preload() {
   font = loadFont('malgunsl.ttf');
+  img1 = loadImage('https://c.tenor.com/eHHdbBT9us0AAAAC/%ED%8F%AD%EB%B0%9C-%EC%8B%AC%EC%98%81.gif');
+  img2 = loadImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQN28TXtx8G6hh3wcf5npDYzDRx9aBWVkM-gQ&usqp=CAU');
 }
-
-
 
 function setup() {
   mode = 0; //initialy the game has not started
-  createCanvas(600, 600,WEBGL);
+  createCanvas(600, 600, WEBGL);
   textFont(font);
   textAlign(CENTER);
+  camera1 = createCamera();
   camera = createCamera();
   //song = loadSound('bbt.mp3');
   cols = w / scl;
@@ -58,74 +60,96 @@ function setup() {
   for (let i=0; i<10; i++) {
     fs[i] = new flightshoot();
   }
-
 }
 
 function draw() {
   clear();
-  if(mode==0){
-    background(255);
-      textSize(30);
-      fill(0);
-    text('[여기에 제목을 입력]',0,-80);
-    textSize(48);
-    text('Press Enter to start',0,120);
-
-  }
-  if (mode==1){
-
-
-  framePreset = frameCount / FRAME_RATE;
-  moonlight = framePreset / 3;
-  if (sin(framePreset) > 0) {
-    background(0);
-  } else {
-    background(80, 188, 223);
-  }
-  // 산 높이 및 산 이동 속도 설정
-  flyingSpeed -= 0.01 + map(cameraSpeed, 0, 50, 0.01, 0.09);
-  setMountain(flyingSpeed);
-  translate(0, 50);
-  rotateX(PI / 3);
-  // 카메라 위치 설정 및 각도 설정
-  camera.lookAt(flightPosX, flightPosY-90, 200);
-  camera.setPosition(flightPosX + cameraPosX, (flightPosY + cameraPosY) + cameraSpeed-90, 266+cameraSpeed);
-  //print(flightPosX, flightPosY);
-  translate(-w / 2, -h / 2);
-  // 산 생성
-  makeMountain();
-  push();
-  // 해와 달 생성
-  makeSun(framePreset);
-  makeMoon(framePreset, moonlight);
-  pop();
-  for (let j=0; j<200; j++) {
-    bullet[j].delay = j;
-    bullet[j].move(map(j, 0, 100, 0, PI));
-    bullet[j].display();
-  }
-  shooter.move(framePreset*6);
-  shooter.display();
-  translate(w / 2, h / 2);
-  /* 비행기 위치 이동 translate */
-  push();
-  translate(flightPosX, flightPosY, 200);
-  flight();
-  pop();
-  if (keyIsDown(SPACEBAR)) {
-    if (flightShootDelay <= 0) {
-      flightShootDelay = 30;
-      fs[mulshoot%10].x = flightPosX;
-      fs[mulshoot%10].y = flightPosY;
-      mulshoot++;
+  if (keyCode===ENTER) {
+    mode=1;
+    shooter.life = 10;
+    score = 0;
+    setCamera(camera);
+    flightPosX = 0;
+    flightPosY = 0;
+    shooter.x = w/2;
+    for (let i=0; i<200; i++) {
+      bullet[i].x = 0;
+      bullet[i].y = 0;
+    }
+    for (let i=0; i<10; i++) {
+      fs[i].x = -0;
+      fs[i].y = -10000;
     }
   }
-  for (let i=0; i<10; i++) {
-    push();
-    fs[i].display();
-    pop();
+  if (mode==0) {
+    background(255);
+    textSize(30);
+    fill(0);
+    text('[여기에 제목을 입력]', 0, -80);
+    textSize(48);
+    text('Press Enter to start', 0, 120);
   }
-  flightShootDelay--;
+  if (mode==2) {
+    setCamera(camera1);
+    image(img1, -300, -400, 600, 600);
+    image(img2, -150, -100, 400, 100);
+    text(score, 0, 120);
+  }
+  if (mode==1) {
+    score++;
+    framePreset = frameCount / FRAME_RATE;
+    moonlight = framePreset / 3;
+    if (sin(framePreset) > 0) {
+      background(0);
+    } else {
+      background(80, 188, 223);
+    }
+    // 산 높이 및 산 이동 속도 설정
+    flyingSpeed -= 0.01 + map(cameraSpeed, 0, 50, 0.01, 0.09);
+    setMountain(flyingSpeed);
+    translate(0, 50);
+    rotateX(PI / 3);
+    // 카메라 위치 설정 및 각도 설정
+    camera.lookAt(flightPosX, flightPosY-90, 200);
+    camera.setPosition(flightPosX + cameraPosX, (flightPosY + cameraPosY) + cameraSpeed-90, 266+cameraSpeed);
+    //print(flightPosX, flightPosY);
+    translate(-w / 2, -h / 2);
+    // 산 생성
+    makeMountain();
+    push();
+    // 해와 달 생성
+    makeSun(framePreset);
+    makeMoon(framePreset, moonlight);
+    pop();
+    if (shooter.state != 0) {
+      for (let j=0; j<200; j++) {
+        bullet[j].delay = j;
+        bullet[j].move(map(j, 0, 100, 0, PI));
+        bullet[j].display();
+      }
+      shooter.move(framePreset*6);
+      shooter.display();
+    }
+    translate(w / 2, h / 2);
+    /* 비행기 위치 이동 translate */
+    push();
+    translate(flightPosX, flightPosY, 200);
+    flight();
+    pop();
+    if (keyIsDown(SPACEBAR)) {
+      if (flightShootDelay <= 0) {
+        flightShootDelay = 30;
+        fs[mulshoot%10].x = flightPosX;
+        fs[mulshoot%10].y = flightPosY;
+        mulshoot++;
+      }
+    }
+    for (let i=0; i<10; i++) {
+      push();
+      fs[i].display();
+      pop();
+    }
+    flightShootDelay--;
   }
 }
 
@@ -228,7 +252,9 @@ class flightshoot {
   display() {
     push();
     translate(this.x, this.y, 200);
-    if(abs(this.x - shooter.x + w/2)<20 && this.y == shooter.y){shooter.life--;}
+    if (abs(this.x - shooter.x + w/2)<20 && this.y == shooter.y) {
+      shooter.life--;
+    }
     this.y -= this.speed;
     fill(0, 255, 0);
     box(2);
@@ -306,6 +332,7 @@ class Bullet {
     translate(this.x, this.y, 200);
     if (abs(this.x-1200-flightPosX)<4 && abs(this.y-600-flightPosY)<4) {
       print("you died");
+      mode = 2;
     }
     if (this.time>200+this.delay) {
       this.x = w/2;
@@ -322,6 +349,7 @@ class Shooter {
     this.x=w/2;
     this.y=-100;
     this.life = 10;
+    this.state = 1;
   }
   move(value) {
     this.x += sin(value)*2;
@@ -329,14 +357,23 @@ class Shooter {
   display() {
     push();
     translate(this.x, this.y, 200);
-    if(this.life>6){
-      fill(255);
-    }
-    if(this.life<=6 && this.life>0){
-      fill(255,0,0);
-    }
-    if(this.life<=0){
+    if (this.life==1) {
       fill(0);
+      shooter.state = 0;
+    }
+    if (this.life<=3 && this.life>1) {
+      if (frameCount%2==1) {
+        fill(127);
+      }
+      if (frameCount%2==0) {
+        fill(255);
+      }
+    }
+    if (this.life<=6 && this.life>3) {
+      fill(255, 0, 0);
+    }
+    if (this.life>6) {
+      fill(255);
     }
     torus(40);
     pop();
@@ -391,11 +428,5 @@ function cameraRollBack() {
     cameraSpeed--;
   } else if (cameraSpeed < 0) {
     cameraSpeed++;
-  }
-}
-
-function keyPressed(){
-  if(keyCode===ENTER){
-    mode=1;
   }
 }
